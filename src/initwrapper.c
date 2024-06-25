@@ -5,7 +5,7 @@
 #include <termios.h>
 #include <time.h>
 #include <crypt.h>
-#include "user_hash_utils.h"
+#include "../headers/user_hash_utils.h"
 
 
 // Settings, best to leave this at default unless you know what you're doing.
@@ -18,7 +18,9 @@
 // Flags, comment out to disable
 #define SET_LOG_FILE_AS_0666 // I tried to keep it obvious :>
 #define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.
-// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this on
+
+// Default is normal, toggled is debug
+// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this 
 // #define SILENCE_CHMOD // Removes --verbose from chmod
 
 // Function to log messages with timestamp
@@ -35,6 +37,9 @@ void log_message(const char *message) {
 
     if (fp != NULL) {
         fprintf(fp, "[%s] %s\n", timestamp, message);
+        if (DEBUG){
+            printf("[LOG] %s\n", message);
+        }
         fclose(fp);
     } else {
         perror("Failed to open log file");
@@ -60,21 +65,22 @@ void write_to_file(const char *filepath, const char *data) {
 }
 
 // Obvious?
-int set_log_permissions(){
+int set_permissions(const char *filepath, const char *permissions){ // Do not ask why param 2 is char.
 	char command[256];
+    char response[4096]; // An attacker could use this to buffer overflow... TODO: security stuff (dont swear this is a public repo) against buffer overflows
 	char flags[10];
 	#ifndef SILENCE_CHMOD
     		strcpy(flags, "--verbose");
 	#else
     		flags[0] = '\0'; 
 	#endif
-	snprintf(command, sizeof(command), "chmod 0666 %s %s", LOG_FILE, flags);
+	snprintf(command, sizeof(command), "chmod %s %s %s", permissions, filepath, flags);
 	int result = system(command);
-	if (DEBUG){
-		printf("Set_log_permissions, chmod returned code %d\n", result);
-	}
+	snprintf(response, sizeof(response), "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\nReturned code %d", permissions, filepath, flags, result); // One fat line and the cherry on top is that we forgot the semicolon
 	return result;
 }
+
+
 
 // Function to handle if user/password combination matches
 int password_works(char *password) {
@@ -154,7 +160,9 @@ int use_shell_script(){
 		return -1; // git -tf out at any rate
 	#endif
 	
-	printf("Not implemented");
+    log_message("Aight so we're starting the shell script now.");
+    // Still not implemented damnit.
+	
 	return 0;
 }
 
@@ -168,7 +176,7 @@ void pre_boot_tasks(){
 
 int main() {
 	#ifdef SET_LOG_FILE_AS_0666
-		set_log_permissions();
+		set_permissions(LOG_FILE, "0666");
 	#endif
 
 	// Call the password prompt function

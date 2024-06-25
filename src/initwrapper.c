@@ -16,8 +16,7 @@
 // Flags, comment out to disable
 #define SET_LOG_FILE_AS_0666 // I tried to keep it obvious :>
 #define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.
-// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages
-// FIXME: SILENCE_FLAG_INFO not implemented
+// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this on
 // #define SILENCE_CHMOD // Removes --verbose from chmod
 
 // Function to log messages with timestamp
@@ -146,8 +145,11 @@ void prompt_password() {
 }
 
 int use_shell_script(){
-	#ifndef USE_SHELL_SCRIPT	
-		return -1; // git -tf out
+	#ifndef USE_SHELL_SCRIPT
+        #ifndef SILENCE_FLAG_INFO
+            printf("USE_SHELL_SCRIPT is off, skipping");
+        #endif
+		return -1; // git -tf out at any rate
 	#endif
 	
 	printf("Not implemented");

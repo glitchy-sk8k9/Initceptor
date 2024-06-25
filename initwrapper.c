@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,9 +7,17 @@
 #include <crypt.h>
 #include "user_hash_utils.h"
 
-#define USERNAME "thisdoesnotexist"
+
+// Settings, best to leave this at default unless you know what you're doing.
+#define USERNAME "initceptor"
 #define LOG_FILE "/var/log/custom_boot_hook.log"
-#define DEBUG false
+#define DEBUG true
+
+// Flags, comment out to disable
+#define SET_LOG_FILE_AS_0666 // I tried to keep it obvious :>
+#define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.
+// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages
+// #define SILENCE_CHMOD // Removes --verbose from chmod
 
 // Function to log messages with timestamp
 void log_message(const char *message) {
@@ -33,6 +40,7 @@ void log_message(const char *message) {
 }
 
 
+// A function i wrote but it's kinda useless :|
 void write_to_file(const char *filepath, const char *data) {
 	FILE *fp = fopen(filepath, "w");
 	if (fp != NULL){
@@ -47,6 +55,23 @@ void write_to_file(const char *filepath, const char *data) {
 		log_message("Data:");
 		log_message(data);
 	}
+}
+
+// Obvious?
+int set_log_permissions(){
+	char command[256];
+	char flags[10];
+	#ifndef SILENCE_CHMOD
+    		strcpy(flags, "--verbose");
+	#else
+    		flags[0] = '\0'; 
+	#endif
+	snprintf(command, sizeof(command), "chmod 0666 %s %s", LOG_FILE, flags);
+	int result = system(command);
+	if (DEBUG){
+		printf("Set_log_permissions, chmod returned code %d\n");
+	}
+	return result;
 }
 
 // Function to handle if user/password combination matches
@@ -119,29 +144,40 @@ void prompt_password() {
     tcsetattr(STDIN_FILENO, TCSANOW, &old_term); // Restore terminal settings
 }
 
+int use_shell_script(){
+	#ifndef USE_SHELL_SCRIPT	
+		return -1; // git -tf out
+	#endif
+	printf("Not implemented");
+	return 0;
+}
+
 void pre_boot_tasks(){
 	// Tasks here
-	system("uname -a");
-	system("echo wait system call works?");
-	system("sleep 2");
+	
 	// Tasks are done, let's log then boot
+	
 	log_message("Pre-boot tasks done.");
 }
 
 int main() {
-    // Call the password prompt function
-    log_message("Initialization script started.");
-    prompt_password();
+	#ifdef SET_LOG_FILE_AS_0666
+		set_log_permissions();
+	#endif
 
-    log_message("Executing pre-boot tasks...");
-    pre_boot_tasks();
+	// Call the password prompt function
+	log_message("Initialization script started.");
+	prompt_password();
 
-    // Finally, exec systemd (commented out for illustration)
-    execl("/lib/systemd/systemd", "systemd", NULL);
+	log_message("Executing pre-boot tasks...");
+	pre_boot_tasks();
 
-    // In case exec somehow fails
-    log_message("Oh hello there, this is NOT how stuff is supposed to work 0_0");
+	// Finally, exec systemd
+	execl("/lib/systemd/systemd", "systemd", NULL);
 
-    return 0;
+	// In case exec somehow fails
+	log_message("Oh hello there, this is NOT how stuff is supposed to work 0_0");
+
+	return 0;
 }
 

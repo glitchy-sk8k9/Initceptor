@@ -1,5 +1,5 @@
-// hash_utils.c
-#include "user_hash_utils.h"
+#include "../headers/user_hash_utils.h"
+// Yes i did have to segment this, well, this far.
 
 void get_salt_from_hash(const char *hash, char *salt) {
     // Find the third dollar sign

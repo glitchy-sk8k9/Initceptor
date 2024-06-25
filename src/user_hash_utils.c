@@ -3,6 +3,7 @@
 
 void get_salt_from_hash(const char *hash, char *salt) {
     // Find the third dollar sign
+    // I copied this straight from askcodi. Hey im new to C ok?
     const char *dollar = strchr(hash, '$');
     if (!dollar) {
         strcpy(salt, hash);

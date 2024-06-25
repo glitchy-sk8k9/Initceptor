@@ -24,16 +24,16 @@ EXEC = $(BINDIR)/main
 # Default target
 all: run
 
-debug: $(OBJS)
-	$(CC) $^ $(CFLAGS) $(DFLAGS) -o $(EXEC)
+debug: 
+	$(CC) $(SRCS) $(CFLAGS) $(DFLAGS) -o $(EXEC)
 
 clean:
 	rm -f $(OBJS) $(EXEC)
 
-compile: $(OBJS)
-	$(CC) $^ $(CFLAGS) -o $(EXEC)
+compile:
+	$(CC) $(SRCS) $(CFLAGS) -o $(EXEC)
 
-run: $(EXEC)
+run: compile 
 	./$(EXEC)
 
 

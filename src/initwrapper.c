@@ -69,7 +69,7 @@ int set_log_permissions(){
 	snprintf(command, sizeof(command), "chmod 0666 %s %s", LOG_FILE, flags);
 	int result = system(command);
 	if (DEBUG){
-		printf("Set_log_permissions, chmod returned code %d\n");
+		printf("Set_log_permissions, chmod returned code %d\n", result);
 	}
 	return result;
 }

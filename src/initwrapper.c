@@ -9,9 +9,11 @@
 
 
 // Settings, best to leave this at default unless you know what you're doing.
-#define USERNAME "initceptor"
-#define LOG_FILE "/var/log/custom_boot_hook.log"
-#define DEBUG true
+#define USERNAME            "initceptor"
+#define LOG_FILE            "/var/log/custom_boot_hook.log"
+#define DEBUG               true
+#define INIT_SYSTEM         "/usr/lib/systemd/systemd" // TODO: make a "change init system" menu. Ncurses maybe?
+#define INIT_SYSTEM_NAME    "systemd" // TODO: Make this dynamic. I do not want this to have execl hold magic values tho. Priorities.
 
 // Flags, comment out to disable
 #define SET_LOG_FILE_AS_0666 // I tried to keep it obvious :>
@@ -177,7 +179,7 @@ int main() {
 	pre_boot_tasks();
 
 	// Finally, exec systemd
-	execl("/lib/systemd/systemd", "systemd", NULL);
+	execl(INIT_SYSTEM, INIT_SYSTEM_NAME, NULL);
 
 	// In case exec somehow fails
 	log_message("Oh hello there, this is NOT how stuff is supposed to work 0_0");

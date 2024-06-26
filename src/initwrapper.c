@@ -74,16 +74,21 @@ int set_permissions(const char *filepath, const char *permissions){ // Do not as
 	#else
     		flags[0] = '\0'; 
 	#endif
-    if (snprintf(command, sizeof(command), "chmod %s %s %s", permissions, filepath, flags) >= sizeof(command)) {
+    if ( (long unsigned int)
+            snprintf(command, sizeof(command), "chmod %s %s %s", permissions, filepath, flags)
+            >= sizeof(command)) {
+
         fprintf(stderr, "Command buffer overflow\n");
         log_message("Warning, buffer overflow got detected, bailing out of command.");
         return -1;
     }
 
 	int result = system(command);
-	if (snprintf(response, sizeof(response), 
-    "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\nReturned code %d",
-    permissions, filepath, flags, result) >= sizeof(response)){
+	if ( (long unsigned int)
+            snprintf(response, sizeof(response), 
+            "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\nReturned code %d",
+            permissions, filepath, flags, result) >= sizeof(response)){
+
         fprintf(stderr, "Response buffer overflow\n");
         log_message("Warning, buffer overflow got detected, bailing out of response.");
         return -1;

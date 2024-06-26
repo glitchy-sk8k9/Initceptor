@@ -143,7 +143,11 @@ void prompt_password() {
     while (attempts > 0) {
         printf("Enter boot password: ");
         fflush(stdout);
-        (void) fgets(entered_password, sizeof(entered_password), stdin); // Yes gcc i am ignoring this
+        char* result = fgets(entered_password, sizeof(entered_password), stdin); // Yes gcc i am ignoring this
+        if (DEBUG){
+            log_message("fgets result below");
+            log_message(result);
+        }
         entered_password[strcspn(entered_password, "\n")] = '\0'; // Remove newline character
          
         if (password_works(entered_password) == 0) {

@@ -197,9 +197,10 @@ int main() {
 	log_message("Executing pre-boot tasks...");
 	pre_boot_tasks();
 
-	// Finally, exec systemd
-	execl(INIT_SYSTEM, INIT_SYSTEM_NAME, NULL);
-
+	// Finally, exec our init system if we're not debugging
+    if (!DEBUG){
+	    execl(INIT_SYSTEM, INIT_SYSTEM_NAME, NULL);
+    }
 	// In case exec somehow fails
 	log_message("Oh hello there, this is NOT how stuff is supposed to work 0_0");
 

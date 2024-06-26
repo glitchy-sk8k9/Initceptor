@@ -5,7 +5,8 @@ CC = gcc
 # Directories
 SRCDIR = ./src
 BINDIR = ./bin
-RELEASE_CONFIGDIR = /usr/share/initceptor_config/
+CDIR   = ./config
+RELEASE_CONFIGDIR = /usr/share/initceptor_config
 INSTALL_LOCATION = /sbin/init
 
 # Compiler flags
@@ -30,12 +31,15 @@ EXEC = $(BINDIR)/main
 all: run
 
 foldersdamnit: # Apparently we have github's shenanigans :/
-	-@mkdir $(SRCDIR)
-	-@mkdir $(BINDIR)
+	-mkdir $(SRCDIR)
+	-mkdir $(BINDIR)
+	-mkdir $(CDIR)
+	-touch $(CDIR)
 
 install:
-	-@sudo mkdir -p $(RELEASE_CONFIGDIR)
-	-@sudo touch $(RELEASE_CONFIGDIR)commands.sh
+	-sudo mkdir -p $(RELEASE_CONFIGDIR)
+	-sudo touch $(RELEASE_CONFIGDIR)/commands.sh
+	-sudo cp $(CDIR)/commands.sh $(RELEASE_CONFIGDIR)/commands.sh
 	@echo "This will overwrite $(INSTALL_LOCATION)"
 	@echo "Do you want to continue? (y/n)"
 	@read answer; \
@@ -61,7 +65,7 @@ install:
 
 $(BINDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
-	-@make foldersdamnit
+	-make foldersdamnit
 
 debug: $(OBJS) 
 	$(CC) $(OBJS) $(CFLAGS) $(DFLAGS) -o $(EXEC)

@@ -27,10 +27,16 @@ EXEC = $(BINDIR)/main
 # Default target
 all: run
 
-$(SRCDIR)/%.o: $(SRCDIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $(BINDIR)/$@
+foldersdamnit: # Apparently we have github's shenanigans :/
 
-debug: $(OBJS)
+	-@mkdir $(SRCDIR)
+	-@mkdir $(BINDIR)
+	
+
+$(BINDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+debug: $(OBJS) 
 	$(CC) $(OBJS) $(CFLAGS) $(DFLAGS) -o $(EXEC)
 
 clean:

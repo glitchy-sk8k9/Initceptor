@@ -67,16 +67,27 @@ void write_to_file(const char *filepath, const char *data) {
 // Obvious?
 int set_permissions(const char *filepath, const char *permissions){ // Do not ask why param 2 is char.
 	char command[256];
-    char response[4096]; // An attacker could use this to buffer overflow... TODO: security stuff (dont swear this is a public repo) against buffer overflows
+    char response[4096];
 	char flags[10];
 	#ifndef SILENCE_CHMOD
     		strcpy(flags, "--verbose");
 	#else
     		flags[0] = '\0'; 
 	#endif
-	snprintf(command, sizeof(command), "chmod %s %s %s", permissions, filepath, flags);
+    if (snprintf(command, sizeof(command), "chmod %s %s %s", permissions, filepath, flags) >= sizeof(command)) {
+        fprintf(stderr, "Command buffer overflow\n");
+        log_message("Warning, buffer overflow got detected, bailing out.");
+        return -1;
+    }
+
 	int result = system(command);
-	snprintf(response, sizeof(response), "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\nReturned code %d", permissions, filepath, flags, result); // One fat line and the cherry on top is that we forgot the semicolon
+	if (snprintf(response, sizeof(response), 
+    "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\nReturned code %d",
+    permissions, filepath, flags, result) >= sizeof(response)){
+        fprintf(stderr, "Command buffer overflow\n");
+        log_message("Warning, buffer overflow got detected, bailing out.");
+        return -1;
+    }
 	return result;
 }
 
@@ -102,18 +113,18 @@ void prompt_password() {
 
     // Make sure the account actually exists :P
     if (initial_check == -1){
-	    fprintf(stderr, "%s", "Error, user to get password from is not found. Please contact your system administrator. System halted.");
+	    fprintf(stderr, "%s", "Error, user to get password from is not found. Please contact your system administrator. System halted.\n");
 	    log_message("password_works returned -1");
 	    exit(EXIT_FAILURE);
     }
     
     if (initial_check == -2){
-	    fprintf(stderr, "%s", "Error, the hash failed. Please contact your system administrator. System halted.");
+	    fprintf(stderr, "%s", "Error, the hash failed. Please contact your system administrator. System halted.\n");
 	    log_message("password_works returned -2");
 	    exit(EXIT_FAILURE);
     }
     if (initial_check == -3){
-	    fprintf(stderr, "%s", "Error, opening the file failed. Please contact your system administrator. System halted.");
+	    fprintf(stderr, "%s", "Error, opening the file failed. Please contact your system administrator. System halted.\n");
 	    log_message("password_works somehow failed with -3, does SHADOW_FILE exist?");
 	    exit(EXIT_FAILURE);
     }

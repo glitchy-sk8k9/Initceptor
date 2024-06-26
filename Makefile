@@ -49,6 +49,7 @@ install:
 
 $(BINDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
+	-@make foldersdamnit
 
 debug: $(OBJS) 
 	$(CC) $(OBJS) $(CFLAGS) $(DFLAGS) -o $(EXEC)

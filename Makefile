@@ -2,8 +2,8 @@
 CC = gcc
 
 # Directories
-SRCDIR = src
-BINDIR = bin
+SRCDIR = ./src
+BINDIR = ./bin
 
 # Compiler flags
 CFLAGS = -Wall -I$(SRCDIR) -lcrypt -O2

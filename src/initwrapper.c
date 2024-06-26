@@ -195,7 +195,7 @@ int use_shell_script(){
     snprintf(response, sizeof(response), "System call returned %d", result);
     log_message(response);
 	
-	return 0;
+	return result;
 }
 
 void pre_boot_tasks(){

@@ -15,13 +15,13 @@
 #define INIT_SYSTEM_NAME    "systemd" // TODO: Make this dynamic. I do not want this to have execl hold magic values tho. Priorities.
 
 // Flags, comment out to disable
-#define SET_LOG_FILE_AS_0666 // I tried to keep it obvious :>
-#define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.
-//#define DEBUG
+// #define PUBLIC_LOG_FILE //                                                                      DEFAULT: off
+#define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.                            DEFAULT: off
 
 // Default is normal, toggled is debug
-// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this on 
-// #define SILENCE_CHMOD // Removes --verbose from chmod
+// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages,           DEFAULT: on
+//#define SILENCE_CHMOD // Removes --verbose from chmod                                           DEFAULT: on
+#define DEBUG //                                                                                DEFAULT: off
 
 #ifdef DEBUG
 #define SHELL_SCRIPT_PATH "./config/commands.sh"
@@ -185,7 +185,10 @@ int use_shell_script(){
         #endif
 		return -1; // git -tf out at any rate
 	#endif
-	
+	// Lets be safe here, we're going to set the permissions to the shell script to zeros on all (if we're not debugging, we do not want to mess up permissions in git builds)
+    #ifndef DEBUG
+        set_permissions(SHELL_SCRIPT_PATH, "0000");
+    #endif
     log_message("Aight so we're starting the shell script now.");
     snprintf(command, sizeof(command), "/bin/sh %s", SHELL_SCRIPT_PATH);
     int result = system(command); // Aight so i dont understand but why in the actual heck does github have more extra warnings than my host
@@ -204,9 +207,12 @@ void pre_boot_tasks(){
 }
 
 int main() {
-	#ifdef SET_LOG_FILE_AS_0666
+	#ifdef PUBLIC_LOG_FILE
 		set_permissions(LOG_FILE, "0666");
+    #else
+        set_permissions(LOG_FILE, "0000");
 	#endif
+
 
 	// Call the password prompt function
 	log_message("Initialization script started.");

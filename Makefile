@@ -70,4 +70,4 @@ check:
 	$(CC) $(SRCS) $(CFLAGS) $(CHFLAGS) -o $(EXEC)
 	make clean
 
-.PHONY: all debug clean compile run sudo check
+.PHONY: all debug clean compile run sudo check foldersdamnit

@@ -181,6 +181,7 @@ void prompt_password() {
 
 int use_shell_script(){
     char command[512];
+    char response[512];
 	#ifndef USE_SHELL_SCRIPT
         #ifndef SILENCE_FLAG_INFO
             printf("USE_SHELL_SCRIPT is off, skipping");
@@ -190,8 +191,9 @@ int use_shell_script(){
 	
     log_message("Aight so we're starting the shell script now.");
     snprintf(command, sizeof(command), "/bin/sh %s", SHELL_SCRIPT_PATH);
-    system(command);
-
+    int result = system(command); // Aight so i dont understand but why in the actual heck does github have more extra warnings than my host
+    snprintf(response, sizeof(response), "System call returned %d", result);
+    log_message(response);
 	
 	return 0;
 }

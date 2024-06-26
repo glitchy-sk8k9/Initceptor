@@ -60,7 +60,7 @@ clean:
 compile: $(OBJS)
 	$(CC) $(OBJS) $(CFLAGS) -o $(EXEC)
 
-run: compile
+run: check
 	./$(EXEC)
 
 sudo: compile
@@ -69,6 +69,5 @@ sudo: compile
 check:
 	# Use this to make sure stuff actually compiles without errors
 	$(CC) $(SRCS) $(CFLAGS) $(CHFLAGS) -o $(EXEC)
-	make clean
 
 .PHONY: all debug clean compile run sudo check foldersdamnit

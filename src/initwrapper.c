@@ -24,7 +24,7 @@
 // #define SILENCE_CHMOD // Removes --verbose from chmod
 
 #ifdef DEBUG
-#define SHELL_SCRIPT_PATH "../config/commands.sh"
+#define SHELL_SCRIPT_PATH "./config/commands.sh"
 #else
 #define SHELL_SCRIPT_PATH "/usr/share/initceptor_config/commands.sh"
 #endif
@@ -180,7 +180,7 @@ void prompt_password() {
 }
 
 int use_shell_script(){
-    char command[256];
+    char command[512];
 	#ifndef USE_SHELL_SCRIPT
         #ifndef SILENCE_FLAG_INFO
             printf("USE_SHELL_SCRIPT is off, skipping");
@@ -190,6 +190,7 @@ int use_shell_script(){
 	
     log_message("Aight so we're starting the shell script now.");
     snprintf(command, sizeof(command), "/bin/sh %s", SHELL_SCRIPT_PATH);
+    system(command);
 
 	
 	return 0;
@@ -197,7 +198,7 @@ int use_shell_script(){
 
 void pre_boot_tasks(){
 	// Tasks here
-	
+	use_shell_script();
 	// Tasks are done, let's log then boot
 	
 	log_message("Pre-boot tasks done.");

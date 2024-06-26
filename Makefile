@@ -82,4 +82,4 @@ strict:
 	# How parents see chores:
 	$(CC) $(SRCS) $(CFLAGS) $(SFLAGS) -o $(EXEC)
 
-.PHONY: all debug clean compile run sudo check foldersdamnit
+.PHONY: all debug clean compile run sudo strict foldersdamnit

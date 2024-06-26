@@ -11,17 +11,24 @@
 // Settings, best to leave this at default unless you know what you're doing.
 #define USERNAME            "initceptor"
 #define LOG_FILE            "/var/log/custom_boot_hook.log"
-#define DEBUG               true
 #define INIT_SYSTEM         "/usr/lib/systemd/systemd" // TODO: make a "change init system" menu. Ncurses maybe?
 #define INIT_SYSTEM_NAME    "systemd" // TODO: Make this dynamic. I do not want this to have execl hold magic values tho. Priorities.
 
 // Flags, comment out to disable
 #define SET_LOG_FILE_AS_0666 // I tried to keep it obvious :>
 #define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.
+#define DEBUG
 
 // Default is normal, toggled is debug
 // #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this on 
 // #define SILENCE_CHMOD // Removes --verbose from chmod
+
+#ifdef DEBUG
+#define SHELL_SCRIPT_PATH "../config/commands.sh"
+#else
+#define SHELL_SCRIPT_PATH "/usr/share/initceptor_config/commands.sh"
+#endif
+
 
 // Function to log messages with timestamp
 void log_message(const char *message) {
@@ -37,9 +44,9 @@ void log_message(const char *message) {
 
     if (fp != NULL) {
         fprintf(fp, "[%s] %s\n", timestamp, message);
-        if (DEBUG){
+        #ifdef DEBUG
             printf("[LOG] %s\n", message);
-        }
+        #endif
         fclose(fp);
     } else {
         perror("Failed to open log file");
@@ -101,9 +108,9 @@ int set_permissions(const char *filepath, const char *permissions){ // Do not as
 // Function to handle if user/password combination matches
 int password_works(char *password) {
     int result = hash_matches_for_user(USERNAME, password);
-    if (DEBUG) {
+    #ifdef DEBUG
         printf("password_works result: %d\n", result);
-    }
+    #endif
     return result;
 }
 
@@ -144,10 +151,10 @@ void prompt_password() {
         printf("Enter boot password: ");
         fflush(stdout);
         char* result = fgets(entered_password, sizeof(entered_password), stdin); // Yes gcc i am ignoring this
-        if (DEBUG){
+        #ifdef DEBUG
             log_message("fgets result below");
             log_message(result);
-        }
+        #endif
         entered_password[strcspn(entered_password, "\n")] = '\0'; // Remove newline character
          
         if (password_works(entered_password) == 0) {
@@ -173,6 +180,7 @@ void prompt_password() {
 }
 
 int use_shell_script(){
+    char command[256];
 	#ifndef USE_SHELL_SCRIPT
         #ifndef SILENCE_FLAG_INFO
             printf("USE_SHELL_SCRIPT is off, skipping");
@@ -181,7 +189,8 @@ int use_shell_script(){
 	#endif
 	
     log_message("Aight so we're starting the shell script now.");
-    // Still not implemented damnit.
+    snprintf(command, sizeof(command), "/bin/sh %s", SHELL_SCRIPT_PATH);
+
 	
 	return 0;
 }
@@ -207,9 +216,9 @@ int main() {
 	pre_boot_tasks();
 
 	// Finally, exec our init system if we're not debugging
-    if (!DEBUG){
+    #ifndef DEBUG
 	    execl(INIT_SYSTEM, INIT_SYSTEM_NAME, NULL);
-    }
+    #endif
 	// In case exec somehow fails
 	log_message("Oh hello there, this is NOT how stuff is supposed to work 0_0");
 

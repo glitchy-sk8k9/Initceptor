@@ -4,6 +4,8 @@ CC = gcc
 # Directories
 SRCDIR = ./src
 BINDIR = ./bin
+RELEASE_CONFIGDIR = /usr/share/initceptor_config/
+INSTALL_LOCATION = /sbin/init
 
 # Compiler flags
 CFLAGS = -Wall -I$(SRCDIR) -lcrypt -O2
@@ -12,7 +14,6 @@ CFLAGS = -Wall -I$(SRCDIR) -lcrypt -O2
 DFLAGS = -g
 
 # And then also the checking flags
-
 CHFLAGS = -Wall -Werror -Wextra
 
 # Source files
@@ -28,10 +29,22 @@ EXEC = $(BINDIR)/main
 all: run
 
 foldersdamnit: # Apparently we have github's shenanigans :/
-
 	-@mkdir $(SRCDIR)
 	-@mkdir $(BINDIR)
-	
+
+install:
+	-@sudo mkdir -p $(RELEASE_CONFIGDIR)
+	-@su -c "cat /dev/null > $(RELEASE_CONFIGDIR)commands.sh"
+	@echo "This will overwrite $(INSTALL_LOCATION)"
+	@echo "Do you want to continue? (y/n)"
+	@read answer; \
+	if [ "$$answer" = "y" ]; then \
+		make check && \
+		make compile && \
+		sudo cp $(EXEC) $(INSTALL_LOCATION); \
+	else \
+		echo "Installation aborted."; \
+	fi
 
 $(BINDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@

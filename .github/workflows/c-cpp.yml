@@ -15,5 +15,5 @@ jobs:
     - uses: actions/checkout@v4
     - name: Make sure directory exists
       run: make foldersdamnit
-    - name: Run make check
-      run: make check
+    - name: Compile strictly
+      run: make strict

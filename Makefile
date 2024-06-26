@@ -36,5 +36,7 @@ compile:
 run: compile 
 	./$(EXEC)
 
+sudo: compile
+	sudo ./$(EXEC)
 
-.PHONY: all debug clean compile run
+.PHONY: all debug clean compile run sudo

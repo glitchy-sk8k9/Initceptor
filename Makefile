@@ -35,17 +35,29 @@ foldersdamnit: # Apparently we have github's shenanigans :/
 
 install:
 	-@sudo mkdir -p $(RELEASE_CONFIGDIR)
-	-@su -c "cat /dev/null > $(RELEASE_CONFIGDIR)commands.sh"
+	-@sudo touch $(RELEASE_CONFIGDIR)commands.sh
 	@echo "This will overwrite $(INSTALL_LOCATION)"
 	@echo "Do you want to continue? (y/n)"
 	@read answer; \
 	if [ "$$answer" = "y" ]; then \
+		echo "Compiling..." && \
 		make check && \
-		make compile && \
-		sudo cp $(EXEC) $(INSTALL_LOCATION); \
+		echo "Copying $(EXEC) to $(INSTALL_LOCATION)..." && \
+		sudo rm $(INSTALL_LOCATION) && \
+		sudo cp $(EXEC) $(INSTALL_LOCATION) && \
+		echo "Adding user..." && \
+		if sudo useradd -r -M -N -c "Account for Initceptor" initceptor; then \
+			echo "Please enter a new password for initceptor." && \
+			sudo passwd initceptor; \
+		else \
+			echo "User already exists."; \
+		fi && \
+		echo "Installation complete!"; \
 	else \
 		echo "Installation aborted."; \
 	fi
+
+
 
 $(BINDIR)/%.o: $(SRCDIR)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@

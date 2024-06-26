@@ -17,7 +17,7 @@
 // Flags, comment out to disable
 #define SET_LOG_FILE_AS_0666 // I tried to keep it obvious :>
 #define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.
-#define DEBUG
+//#define DEBUG
 
 // Default is normal, toggled is debug
 // #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this on 
@@ -151,10 +151,7 @@ void prompt_password() {
         printf("Enter boot password: ");
         fflush(stdout);
         char* result = fgets(entered_password, sizeof(entered_password), stdin); // Yes gcc i am ignoring this
-        #ifdef DEBUG
-            log_message("fgets result below");
-            log_message(result);
-        #endif
+	(void) result;
         entered_password[strcspn(entered_password, "\n")] = '\0'; // Remove newline character
          
         if (password_works(entered_password) == 0) {

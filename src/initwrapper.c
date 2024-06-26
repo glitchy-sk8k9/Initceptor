@@ -13,6 +13,7 @@
 #define LOG_FILE            "/var/log/custom_boot_hook.log"
 #define INIT_SYSTEM         "/usr/lib/systemd/systemd" // TODO: make a "change init system" menu. Ncurses maybe?
 #define INIT_SYSTEM_NAME    "systemd" // TODO: Make this dynamic. I do not want this to have execl hold magic values tho. Priorities.
+#define SHELL               "/bin/sh"
 
 // Flags, comment out to disable
 // #define PUBLIC_LOG_FILE //                                                                      DEFAULT: off
@@ -190,7 +191,7 @@ int use_shell_script(){
         set_permissions(SHELL_SCRIPT_PATH, "0000");
     #endif
     log_message("Aight so we're starting the shell script now.");
-    snprintf(command, sizeof(command), "/bin/sh %s", SHELL_SCRIPT_PATH);
+    snprintf(command, sizeof(command), "%s %s", SHELL, SHELL_SCRIPT_PATH);
     int result = system(command); // Aight so i dont understand but why in the actual heck does github have more extra warnings than my host
     snprintf(response, sizeof(response), "System call returned %d", result);
     log_message(response);

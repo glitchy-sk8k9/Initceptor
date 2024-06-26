@@ -20,7 +20,7 @@
 #define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.
 
 // Default is normal, toggled is debug
-// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this 
+// #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages, yeah you should turn this on 
 // #define SILENCE_CHMOD // Removes --verbose from chmod
 
 // Function to log messages with timestamp

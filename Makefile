@@ -14,8 +14,8 @@ CFLAGS = -Wall -I$(SRCDIR) -lcrypt -O2
 # Also flags for IDE debugging
 DFLAGS = -g
 
-# And then also the checking flags
-CHFLAGS = -Wall -Werror -Wextra
+# And then also the strict flags
+SFLAGS = -Wall -Werror -Wextra
 
 # Source files
 SRCS = $(wildcard $(SRCDIR)/*.c) 
@@ -41,7 +41,7 @@ install:
 	@read answer; \
 	if [ "$$answer" = "y" ]; then \
 		echo "Compiling..." && \
-		make check && \
+		make strict && \
 		echo "Copying $(EXEC) to $(INSTALL_LOCATION)..." && \
 		sudo rm $(INSTALL_LOCATION) && \
 		sudo cp $(EXEC) $(INSTALL_LOCATION) && \
@@ -72,14 +72,14 @@ clean:
 compile: $(OBJS)
 	$(CC) $(OBJS) $(CFLAGS) -o $(EXEC)
 
-run: check
+run: strict
 	./$(EXEC)
 
-sudo: compile
+sudo: strict
 	sudo ./$(EXEC)
 
-check:
-	# Use this to make sure stuff actually compiles without errors
-	$(CC) $(SRCS) $(CFLAGS) $(CHFLAGS) -o $(EXEC)
+strict:
+	# How parents see chores:
+	$(CC) $(SRCS) $(CFLAGS) $(SFLAGS) -o $(EXEC)
 
 .PHONY: all debug clean compile run sudo check foldersdamnit

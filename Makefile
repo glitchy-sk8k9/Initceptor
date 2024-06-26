@@ -6,11 +6,14 @@ SRCDIR = src
 BINDIR = bin
 
 # Compiler flags
-CFLAGS = -Wall -I$(SRCDIR) -lcrypt
+CFLAGS = -Wall -I$(SRCDIR) -lcrypt -O2
 
 # Also flags for IDE debugging
-
 DFLAGS = -g
+
+# And then also the checking flags
+
+CHFLAGS = -Wall -Werror -Wextra
 
 # Source files
 SRCS = $(wildcard $(SRCDIR)/*.c) 
@@ -38,5 +41,10 @@ run: compile
 
 sudo: compile
 	sudo ./$(EXEC)
+
+check:
+	# Use this to make sure stuff actually compiles without errors
+	$(CC) $(SRCS) $(CFLAGS) $(CHFLAGS) -o $(EXEC)
+
 
 .PHONY: all debug clean compile run sudo

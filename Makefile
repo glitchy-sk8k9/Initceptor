@@ -1,6 +1,7 @@
 # Compiler
 CC = gcc
 
+
 # Directories
 SRCDIR = ./src
 BINDIR = ./bin

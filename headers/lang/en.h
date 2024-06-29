@@ -14,7 +14,7 @@ static const char STRING_FORMAT_BUFFER_OVERFLOW[]                   =   "%s buff
 static const char STRING_BAILING_BUFFER_OVERFLOW_FORMAT[]           =   "Buffer overflow detected, bailing out of %s!\n";
 
 //Strings related to set_permissions
-static const char STRING_SET_PERMISSIONS_EXECUTED[]                 =   "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\nReturned code %d\n";
+static const char STRING_SET_PERMISSIONS_EXECUTED[]                 =   "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\tReturned code %d\n";
 
 // Strings related to prompt_password and password_works
 

@@ -14,7 +14,7 @@
 #define INIT_SYSTEM         "/usr/lib/systemd/systemd" // TODO: make a "change init system" menu. Ncurses maybe?
 #define INIT_SYSTEM_NAME    "systemd" // TODO: Make this dynamic. I do not want this to have execl hold magic values tho. Priorities.
 #define SHELL               "/bin/sh"
-#include                    "../headers/lang/en.h" // Set your language here!
+#include                    "../headers/lang/lv.h" // Set your language here!
 
 // Flags, comment out to disable
 // #define PUBLIC_LOG_FILE //                                                                      DEFAULT: off

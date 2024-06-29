@@ -5,14 +5,14 @@
 #include <termios.h>
 #include <time.h>
 #include <crypt.h>
+#include <libgen.h>
 #include "../headers/user_hash_utils.h"
 
 
 // Settings, best to leave this at default unless you know what you're doing.
 #define USERNAME            "initceptor"
 #define LOG_FILE            "/var/log/custom_boot_hook.log"
-#define INIT_SYSTEM         "/usr/lib/systemd/systemd" // TODO: make a "change init system" menu. Ncurses maybe?
-#define INIT_SYSTEM_NAME    "systemd" // TODO: Make this dynamic. I do not want this to have execl hold magic values tho. Priorities.
+#define INIT_SYSTEM         "/usr/bin/python" // TODO: make a "change init system" menu. Ncurses maybe?
 #define SHELL               "/bin/sh"
 #include                    "../headers/lang/en.h" // Set your language here!
 
@@ -23,7 +23,7 @@
 // Default is normal, toggled is debug
 // #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages,           DEFAULT: on
 //#define SILENCE_CHMOD // Removes --verbose from chmod                                           DEFAULT: on
-#define DEBUG //                                                                                DEFAULT: off
+//#define DEBUG //                                                                                DEFAULT: off
 
 #ifdef DEBUG
 #define SHELL_SCRIPT_PATH "./config/commands.sh"
@@ -222,7 +222,8 @@ int main() {
 
 	// Finally, exec our init system if we're not debugging
     #ifndef DEBUG
-	    execl(INIT_SYSTEM, INIT_SYSTEM_NAME, NULL);
+        char *init_system_name = basename(INIT_SYSTEM);
+	    execl(INIT_SYSTEM,init_system_name, NULL);
     #endif
 	// In case exec somehow fails
 	log_message(STRING_DID_NOT_EXEC_INIT);

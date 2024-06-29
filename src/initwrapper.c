@@ -9,16 +9,17 @@
 #include "../headers/user_hash_utils.h"
 
 
-// Settings, best to leave this at default unless you know what you're doing.
+// Settings
 #define USERNAME            "initceptor"
 #define LOG_FILE            "/var/log/custom_boot_hook.log"
-#define INIT_SYSTEM         "/usr/bin/python" // TODO: make a "change init system" menu. Ncurses maybe?
+#define INIT_SYSTEM         "/lib/systemd/systemd" // TODO: make a "change init system" menu. Ncurses maybe?
 #define SHELL               "/bin/sh"
 #include                    "../headers/lang/en.h" // Set your language here!
 
 // Flags, comment out to disable
 // #define PUBLIC_LOG_FILE //                                                                      DEFAULT: off
 #define USE_SHELL_SCRIPT // Warning, a bad actor could utilize this.                            DEFAULT: off
+#define PROMPT_PASSWORD //  Do you need this? If so, keep it on.                                DEFAULT: on
 
 // Default is normal, toggled is debug
 // #define SILENCE_FLAG_INFO // Turns off "X flag is disabled, skipping..." messages,           DEFAULT: on
@@ -142,7 +143,6 @@ void prompt_password() {
     new_term.c_lflag &= ~(ECHO);  // Turn off echoing
     tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
 
-    // TODO: make option to disable password via flags
 
     while (attempts > 0) {
         printf(STRING_ENTER_BOOT_PASSWORD);
@@ -214,8 +214,9 @@ int main() {
 	#endif
 
 
-
+    #ifdef PROMPT_PASSWORD // If this is off we're skipping like 67+ lines of code
 	prompt_password();
+    #endif
 
 	log_message(STRING_LOG_EXECUTING_PRE_BOOT_TASKS);
 	pre_boot_tasks();

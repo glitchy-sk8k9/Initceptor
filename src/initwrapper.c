@@ -14,6 +14,7 @@
 #define INIT_SYSTEM         "/usr/lib/systemd/systemd" // TODO: make a "change init system" menu. Ncurses maybe?
 #define INIT_SYSTEM_NAME    "systemd" // TODO: Make this dynamic. I do not want this to have execl hold magic values tho. Priorities.
 #define SHELL               "/bin/sh"
+#include                    "../headers/lang/en.h" // Set your language here!
 
 // Flags, comment out to disable
 // #define PUBLIC_LOG_FILE //                                                                      DEFAULT: off
@@ -44,33 +45,16 @@ void log_message(const char *message) {
     FILE *fp = fopen(LOG_FILE, "a");
 
     if (fp != NULL) {
-        fprintf(fp, "[%s] %s\n", timestamp, message);
+        fprintf(fp, "[%s] %s", timestamp, message);
         #ifdef DEBUG
-            printf("[LOG] %s\n", message);
+            printf("[LOG] %s", message);
         #endif
         fclose(fp);
     } else {
-        perror("Failed to open log file");
+        perror(STRING_ERROR_LOG_FILE_OPEN_FAIL);
     }
 }
 
-
-// A function i wrote but it's kinda useless :|
-void write_to_file(const char *filepath, const char *data) {
-	FILE *fp = fopen(filepath, "w");
-	if (fp != NULL){
-		fprintf(fp, "%s", data);
-		fclose(fp);
-		log_message("Writing worked");
-	} else {
-		log_message("Error in write_to_file!");
-		log_message("Error data below");
-		log_message("File path:");
-		log_message(filepath);
-		log_message("Data:");
-		log_message(data);
-	}
-}
 
 // Obvious?
 int set_permissions(const char *filepath, const char *permissions){ // Do not ask why param 2 is char.
@@ -86,20 +70,24 @@ int set_permissions(const char *filepath, const char *permissions){ // Do not as
             snprintf(command, sizeof(command), "chmod %s %s %s", permissions, filepath, flags)
             >= sizeof(command)) {
 
-        fprintf(stderr, "Command buffer overflow\n");
-        log_message("Warning, buffer overflow got detected, bailing out of command.");
+        fprintf(stderr, STRING_FORMAT_BUFFER_OVERFLOW, STRING_COMMAND);
+        snprintf(response, sizeof(response), STRING_BAILING_BUFFER_OVERFLOW_FORMAT, STRING_COMMAND);
+        log_message(response);
         return -1;
     }
 
 	int result = system(command);
 	if ( (long unsigned int)
             snprintf(response, sizeof(response), 
-            "Set_permissions executed with parameters\n\tPermissions = %s\n\tFilepath = %s\n\tFlags = %s\n\nReturned code %d",
+            STRING_SET_PERMISSIONS_EXECUTED,
             permissions, filepath, flags, result) >= sizeof(response)){
 
-        fprintf(stderr, "Response buffer overflow\n");
-        log_message("Warning, buffer overflow got detected, bailing out of response.");
+        fprintf(stderr, STRING_FORMAT_BUFFER_OVERFLOW, STRING_RESPONSE);
+        snprintf(response, sizeof(response), STRING_BAILING_BUFFER_OVERFLOW_FORMAT, STRING_RESPONSE);
+        log_message(response);
         return -1;
+    } else {
+        log_message(response);
     }
 	return result;
 }
@@ -110,7 +98,7 @@ int set_permissions(const char *filepath, const char *permissions){ // Do not as
 int password_works(char *password) {
     int result = hash_matches_for_user(USERNAME, password);
     #ifdef DEBUG
-        printf("password_works result: %d\n", result);
+        printf(STRING_DEBUG_PASSWORD_WORKS_RESULT, result);
     #endif
     return result;
 }
@@ -119,27 +107,33 @@ int password_works(char *password) {
 void prompt_password() {
     char entered_password[256];
     int attempts = 3;
-    int initial_check = password_works("Placeholder");
+    int initial_check = password_works("1111");
+    char response[4096];
+    bool exit_because_failed = false;
     
     // if (DEBUG){ printf("%b", initial_check); }
     // Thank you for your help. The fly has been swatted.
 
     // Make sure the account actually exists :P
     if (initial_check == -1){
-	    fprintf(stderr, "%s", "Error, user to get password from is not found. Please contact your system administrator. System halted.\n");
-	    log_message("password_works returned -1");
-	    exit(EXIT_FAILURE);
+	    fprintf(stderr, STRING_ERROR_USER_NONEXISTENT_PROMPT_PASSWORD);
+	    snprintf(response, sizeof(response), STRING_FORMAT_ERROR_PASSWORD_WORKS_RETURNED, STRING_CHECK_IF_USER_EXISTS);
+	    exit_because_failed = true;
     }
     
-    if (initial_check == -2){
-	    fprintf(stderr, "%s", "Error, the hash failed. Please contact your system administrator. System halted.\n");
-	    log_message("password_works returned -2");
-	    exit(EXIT_FAILURE);
+    if (initial_check == -2 && !exit_because_failed){
+	    fprintf(stderr, "%s", STRING_ERROR_HASH_FAILED_PROMPT_PASSWORD);
+	    snprintf(response, sizeof(response), STRING_FORMAT_ERROR_PASSWORD_WORKS_RETURNED, STRING_PLEASE_DEBUG_HASHING_PROCESS);
+        exit_because_failed = true;
     }
-    if (initial_check == -3){
-	    fprintf(stderr, "%s", "Error, opening the file failed. Please contact your system administrator. System halted.\n");
-	    log_message("password_works somehow failed with -3, does SHADOW_FILE exist?");
-	    exit(EXIT_FAILURE);
+    if (initial_check == -3 && !exit_because_failed){
+	    fprintf(stderr, STRING_ERROR_SHADOW_FILE_OPEN_FAIL);
+	    snprintf(response, sizeof(response), STRING_FORMAT_ERROR_PASSWORD_WORKS_RETURNED, STRING_FORMAT_DOES_SHADOW_FILE_EXIST);
+	    exit_because_failed = true;
+    }
+
+    if (exit_because_failed) {
+        exit(EXIT_FAILURE);
     }
 
     struct termios old_term, new_term;
@@ -148,26 +142,28 @@ void prompt_password() {
     new_term.c_lflag &= ~(ECHO);  // Turn off echoing
     tcsetattr(STDIN_FILENO, TCSANOW, &new_term);
 
+    // TODO: make option to disable password via flags
+
     while (attempts > 0) {
-        printf("Enter boot password: ");
+        printf(STRING_ENTER_BOOT_PASSWORD);
         fflush(stdout);
-        char* result = fgets(entered_password, sizeof(entered_password), stdin); // Yes gcc i am ignoring this
-	(void) result;
-        entered_password[strcspn(entered_password, "\n")] = '\0'; // Remove newline character
+        char* result = fgets(entered_password, sizeof(entered_password), stdin); // Yes gcc i am ignoring this screw you
+	    (void) result;
+        entered_password[strcspn(entered_password, "\n")] = '\0';
          
         if (password_works(entered_password) == 0) {
-            printf("Password correct. Booting...\n");
-            log_message("Password correct. Booting...");
+            printf(STRING_CORRECT_PASSWORD);
+            log_message(STRING_CORRECT_PASSWORD);
             tcsetattr(STDIN_FILENO, TCSANOW, &old_term); // Restore terminal settings
             return;
         } else {
-            printf("Incorrect password. Try again.\n");
-            log_message("Incorrect password entered.");
+            printf(STRING_WRONG_PASSWORD);
+            log_message(STRING_LOG_WRONG_PASSWORD);
             attempts--;
 
             if (attempts == 0) {
-                log_message("Too many failed attempts. System will halt.");
-                printf("Halting system.\n\nGoodbye.");
+                log_message(STRING_LOG_USER_TOO_MANY_ATTEMPTS);
+                printf(STRING_HALT_SYSTEM_TOO_MANY_ATTEMPTS);
                 tcsetattr(STDIN_FILENO, TCSANOW, &old_term); // Restore terminal settings
                 exit(EXIT_FAILURE);
             }
@@ -182,7 +178,7 @@ int use_shell_script(){
     char response[512];
 	#ifndef USE_SHELL_SCRIPT
         #ifndef SILENCE_FLAG_INFO
-            printf("USE_SHELL_SCRIPT is off, skipping");
+            printf(STRING_FORMAT_FLAG_DISABLED_SKIPPING, "USE_SHELL_SCRIPT");
         #endif
 		return -1; // git -tf out at any rate
 	#endif
@@ -190,10 +186,12 @@ int use_shell_script(){
     #ifndef DEBUG
         set_permissions(SHELL_SCRIPT_PATH, "0000");
     #endif
-    log_message("Aight so we're starting the shell script now.");
+    log_message(STRING_LOG_USING_SHELL_SCRIPT);
     snprintf(command, sizeof(command), "%s %s", SHELL, SHELL_SCRIPT_PATH);
     int result = system(command); // Aight so i dont understand but why in the actual heck does github have more extra warnings than my host
-    snprintf(response, sizeof(response), "System call returned %d", result);
+    #ifdef DEBUG
+    snprintf(response, sizeof(response), STRING_FORMAT_DEBUG_SYSTEM_CALL_RETURNED, result);
+    #endif
     log_message(response);
 	
 	return result;
@@ -204,10 +202,11 @@ void pre_boot_tasks(){
 	use_shell_script();
 	// Tasks are done, let's log then boot
 	
-	log_message("Pre-boot tasks done.");
+	log_message(STRING_LOG_PRE_BOOT_TASKS_DONE);
 }
 
 int main() {
+    log_message(STRING_LOG_MAIN_ENTERED);
 	#ifdef PUBLIC_LOG_FILE
 		set_permissions(LOG_FILE, "0666");
     #else
@@ -215,11 +214,10 @@ int main() {
 	#endif
 
 
-	// Call the password prompt function
-	log_message("Initialization script started.");
+
 	prompt_password();
 
-	log_message("Executing pre-boot tasks...");
+	log_message(STRING_LOG_EXECUTING_PRE_BOOT_TASKS);
 	pre_boot_tasks();
 
 	// Finally, exec our init system if we're not debugging
@@ -227,7 +225,7 @@ int main() {
 	    execl(INIT_SYSTEM, INIT_SYSTEM_NAME, NULL);
     #endif
 	// In case exec somehow fails
-	log_message("Oh hello there, this is NOT how stuff is supposed to work 0_0");
+	log_message(STRING_DID_NOT_EXEC_INIT);
 
 	return 0;
 }

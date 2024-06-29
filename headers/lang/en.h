@@ -1,5 +1,3 @@
-//TODO: subdivide it farther than just normal and debug.
-
 // Generic strings
 
 static const char STRING_COMMAND[]                                  =   "command";
